@@ -35,10 +35,9 @@ namespace NudeAssignment.Controllers
         }
 
         [HttpPost("[action]")]
-        public void Add([FromBody]string item)
+        public void Add([FromBody]CoverageItem item)
         {
-            var coverageItem = JsonConvert.DeserializeObject<CoverageItem>(item);
-            _service.AddCustomerItem(coverageItem);
+            _service.AddCustomerItem(item);
         }
 
         [HttpGet("[action]")]

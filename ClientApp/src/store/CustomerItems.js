@@ -17,15 +17,13 @@ export const actionCreators = {
     },
 
     addCustomerItem: data => async () => {
-        var bodydata = JSON.stringify(data);
-
         await fetch('api/CustomerItem/Add', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(bodydata)
+            body: JSON.stringify(data)
         }).then();
     },
 
