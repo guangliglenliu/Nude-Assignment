@@ -17,8 +17,12 @@
 
   <ItemGroup>
     <!-- Don't publish the SPA source files, but do show them in the project files list -->
+    <Compile Remove="NudeAssignment.Test\**" />
     <Content Remove="$(SpaRoot)**" />
+    <Content Remove="NudeAssignment.Test\**" />
+    <EmbeddedResource Remove="NudeAssignment.Test\**" />
     <None Remove="$(SpaRoot)**" />
+    <None Remove="NudeAssignment.Test\**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
   </ItemGroup>
 

@@ -91,11 +91,11 @@ namespace NudeAssignment.Services
 
                 // Save if changed
                 if (bChanged) _dbContext.SaveChanges();
-                else return null;
+                else return "";
             }
             catch
             {
-                return null;
+                return "";
             }
 
             return itemId.ToString();

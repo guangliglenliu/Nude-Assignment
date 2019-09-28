@@ -25,11 +25,15 @@ class GetCustomerItems extends Component {
 
     removeItem(e) {
         this.props.removeCustomerItem(e.target.id);
+        // Just for now
+        alert("Remove ...");
         this.getData();
     }
 
     addClick() {
         this.props.addCustomerItem(this.props.newItem);
+        // The logic should move to store, use dispatch 
+        alert("Add clicked");
         this.getData();
     }
 

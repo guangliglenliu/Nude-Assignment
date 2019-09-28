@@ -23,23 +23,11 @@ export const actionCreators = {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(data)
-        }).then(r => {
-            if (r.status === 204) { alert("Duplicated or error"); }
-            else {
-                r.json().then(data => {
-                    alert(`Added, item id is ${data}`);
-                })
-            }
-        })
-
+        });
     },
 
     removeCustomerItem: itemId => async () => {
-        await fetch(`api/CustomerItem/Remove?itemId=${itemId}`).then(r => r.json().then(data => {
-            if (data === 0) { alert("Removed") }
-            else if (data === 1) { alert("Not found") }
-            else alert("error.")
-        }));
+        await fetch(`api/CustomerItem/Remove?itemId=${itemId}`);
     },
 
     setNewItemName: newItemName => ({ type: ActionType.SET_NEW_ITEM_NAME, newItemName }),
