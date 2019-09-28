@@ -11,7 +11,7 @@ namespace NudeAssignment.Services
     {
         IEnumerable<LKPCoverageItemCategory> GetCoverageItemCategories();
         IEnumerable<CustomerCategoriesItems> GetCustomerItems(long customerId);
-        void AddCustomerItem(CoverageItem coverageItem);
-        void RemoveCustomerItem(Guid itemId);
+        string AddCustomerItem(CoverageItem coverageItem);
+        int RemoveCustomerItem(Guid itemId);
     }
 }

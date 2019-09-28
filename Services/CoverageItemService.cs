@@ -26,74 +26,106 @@ namespace NudeAssignment.Services
         {
             List<CustomerCategoriesItems> items = new List<CustomerCategoriesItems>();
 
-            var customerItems = _dbContext.CoverageItems
-                .Where(item => _dbContext.CustomerItems
-                    .Where(ci => ci.CustomerId == customerId)
-                    .Select(i => i.ItemId).Contains(item.ItemId));
-
-            var categoryIds = customerItems
-                .OrderBy(item => item.Name)
-                .Select(item => item.CategoryId)
-                .Distinct();
-
-            foreach(var cid in categoryIds)
+            foreach (var category in _dbContext.LKPCoverageItemCategories)
             {
                 var item = new CustomerCategoriesItems()
                 {
-                    CategoryId = cid,
-                    CategoryName = _dbContext.LKPCoverageItemCategories.Where(i => i.CategoryId == cid).First().Name,
-                    CoverageItems = customerItems.Where(i => i.CategoryId == cid).OrderBy(it => it.Name)
+                    CategoryId = category.CategoryId,
+                    CategoryName = category.Name,
+                    CoverageItems = (from customerItem in _dbContext.CustomerItems
+                                     join coverageItem in _dbContext.CoverageItems on customerItem.ItemId equals coverageItem.ItemId
+                                     where customerItem.CustomerId == customerId && coverageItem.CategoryId == category.CategoryId
+                                     orderby coverageItem.Name
+                                     select coverageItem)
+                                     
                 };
-                items.Add(item);
+                // Take it if this customer have the items in this category
+                if (item.CoverageItems.Any()) items.Add(item);
             }
+
+            // Order by category name
+            if (items.Any()) items = items.OrderBy(item => item.CategoryName).ToList();
 
             return items;
         }
 
-        public void AddCustomerItem(CoverageItem coverageItem)
+        public string AddCustomerItem(CoverageItem coverageItem)
         {
             Guid itemId = Guid.NewGuid();
+            bool bChanged = false;
 
-            // Try to find the item
-            var itemExisting = _dbContext.CoverageItems
-                .Where(item => item.CategoryId == coverageItem.CategoryId
-                && item.Value == coverageItem.Value
-                && string.Compare(item.Name, coverageItem.Name, true) == 0)
-                .FirstOrDefault();
-            if (itemExisting != null) itemId = itemExisting.ItemId;
-            else
+            try
             {
-                // Add the new item
-                _dbContext.CoverageItems.Add(new CoverageItem
+                // Try to find the item
+                var itemExisting = _dbContext.CoverageItems
+                    .Where(item => item.CategoryId == coverageItem.CategoryId
+                        && item.Value == coverageItem.Value
+                        && string.Compare(item.Name, coverageItem.Name, true) == 0)
+                    .FirstOrDefault();
+
+                if (itemExisting != null) itemId = itemExisting.ItemId;
+                else
                 {
-                    ItemId = itemId,
-                    Name = coverageItem.Name,
-                    Value = coverageItem.Value,
-                    CategoryId = coverageItem.CategoryId
-                });
+                    bChanged = true;
+                    // Add the new item
+                    _dbContext.CoverageItems.Add(new CoverageItem
+                    {
+                        ItemId = itemId,
+                        Name = coverageItem.Name,
+                        Value = coverageItem.Value,
+                        CategoryId = coverageItem.CategoryId
+                    });
+                }
+
+                // Duplicate check
+                if (!_dbContext.CustomerItems.Any(ci => ci.ItemId == itemId))
+                {
+                    bChanged = true;
+                    // Add the customer reference data
+                    _dbContext.CustomerItems.Add(new CustomerItem
+                    {
+                        CustomerId = 1,
+                        ItemId = itemId
+                    });
+                }
+
+                // Save if changed
+                if (bChanged) _dbContext.SaveChanges();
+                else return null;
+            }
+            catch
+            {
+                return null;
             }
 
-            // Add the customer reference data
-            _dbContext.CustomerItems.Add(new CustomerItem
-            {
-                CustomerId = 1,
-                ItemId = itemId
-            });
-
-            // Save
-            _dbContext.SaveChanges();
+            return itemId.ToString();
         }
 
-        public void RemoveCustomerItem(Guid itemId)
+        /// <summary>
+        /// Return 0 = removed, 1 = not found, -1 = error, controller based on this return to handle the response code (later)
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
+        public int RemoveCustomerItem(Guid itemId)
         {
-            var item = _dbContext.CustomerItems
-                .Where(i => i.CustomerId == 1 && i.ItemId == itemId)
-                .FirstOrDefault();
-
-            if (item != null)
+            try
             {
-                _dbContext.CustomerItems.Remove(item);
-                _dbContext.SaveChanges();
+                var item = _dbContext.CustomerItems
+                    .Where(i => i.CustomerId == 1 && i.ItemId == itemId)
+                    .FirstOrDefault();
+
+                if (item == null) return 1;
+                else
+                {
+                    _dbContext.CustomerItems.Remove(item);
+                    _dbContext.SaveChanges();
+
+                    return 0;
+                }
+            }
+            catch
+            {
+                return -1;
             }
         }
     }

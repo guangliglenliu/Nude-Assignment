@@ -35,15 +35,15 @@ namespace NudeAssignment.Controllers
         }
 
         [HttpPost("[action]")]
-        public void Add([FromBody]CoverageItem item)
+        public string Add([FromBody]CoverageItem item)
         {
-            _service.AddCustomerItem(item);
+            return _service.AddCustomerItem(item);
         }
 
         [HttpGet("[action]")]
-        public void Remove(Guid itemId)
+        public int Remove(Guid itemId)
         {
-            _service.RemoveCustomerItem(itemId);
+            return _service.RemoveCustomerItem(itemId);
         }
     }
 }

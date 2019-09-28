@@ -25,13 +25,11 @@ class GetCustomerItems extends Component {
 
     removeItem(e) {
         this.props.removeCustomerItem(e.target.id);
-        alert("The selected item has been removed from the customer item list.");
         this.getData();
     }
 
     addClick() {
         this.props.addCustomerItem(this.props.newItem);
-        alert("The selected item has been added from the customer item list.");
         this.getData();
     }
 

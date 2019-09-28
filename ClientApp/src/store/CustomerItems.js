@@ -1,5 +1,4 @@
 import * as ActionType from "../constants/actionTypeConstants";
-import { axios } from 'axios';
 
 const initialState = { categories: [], customerItems: [], newItem: { name: '', value: 1, categoryId: 1 }, isLoading: false };
 
@@ -24,11 +23,23 @@ export const actionCreators = {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(data)
-        }).then();
+        }).then(r => {
+            if (r.status === 204) { alert("Duplicated or error"); }
+            else {
+                r.json().then(data => {
+                    alert(`Added, item id is ${data}`);
+                })
+            }
+        })
+
     },
 
     removeCustomerItem: itemId => async () => {
-        await fetch(`api/CustomerItem/Remove?itemId=${itemId}`).then();
+        await fetch(`api/CustomerItem/Remove?itemId=${itemId}`).then(r => r.json().then(data => {
+            if (data === 0) { alert("Removed") }
+            else if (data === 1) { alert("Not found") }
+            else alert("error.")
+        }));
     },
 
     setNewItemName: newItemName => ({ type: ActionType.SET_NEW_ITEM_NAME, newItemName }),
